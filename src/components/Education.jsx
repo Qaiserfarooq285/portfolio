@@ -37,7 +37,7 @@ export default function Education() {
       >
         {/* Section Title */}
         <motion.div variants={itemVariants} className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Education</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4">Education</h2>
           <div className="w-16 h-1 bg-white mx-auto"></div>
         </motion.div>
 

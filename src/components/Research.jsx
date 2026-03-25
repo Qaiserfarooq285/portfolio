@@ -30,7 +30,7 @@ export default function Research() {
         className="max-w-5xl w-full"
       >
         <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Research</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white mb-4">Research</h2>
           <div className="w-16 h-1 bg-white mx-auto"></div>
         </div>
 

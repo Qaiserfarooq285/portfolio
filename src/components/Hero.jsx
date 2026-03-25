@@ -40,10 +40,10 @@ export default function Hero() {
         {/* Left Side - Text */}
         <motion.div variants={itemVariants} className="space-y-8">
           <div>
-            <motion.h1 variants={itemVariants} className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight break-words">
-              <Typewriter texts={nameTypewriterText} speed={120} delayBetween={1600} className="text-3xl sm:text-5xl md:text-6xl font-bold text-white break-words" />
+            <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4 leading-tight break-words">
+              <Typewriter texts={nameTypewriterText} speed={120} delayBetween={1600} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white break-words" />
             </motion.h1>
-            <motion.p variants={itemVariants} className="text-xl sm:text-2xl md:text-3xl font-light text-gray-400 mb-6">
+            <motion.p variants={itemVariants} className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-light text-gray-400 mb-6">
               AI Engineer
             </motion.p>
           </div>
@@ -76,13 +76,13 @@ export default function Hero() {
         {/* Right Side - Image Placeholder */}
         <motion.div
           variants={itemVariants}
-          className="flex justify-center items-center"
+          className="flex justify-center items-center w-full"
         >
-          <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 flex items-center justify-center">
+          <div className="relative w-[78vw] max-w-[300px] sm:w-[70vw] sm:max-w-[360px] md:w-[30rem] md:max-w-[420px] aspect-square flex items-center justify-center mx-auto">
             <img
               src="/IMG_9642-2.png"
               alt="Profile"
-              className="w-full h-full object-contain"
+              className="w-full h-full object-contain object-center"
               onError={(e) => {
                 e.target.style.display = 'none';
                 e.target.nextElementSibling.style.display = 'flex';

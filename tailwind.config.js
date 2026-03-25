@@ -10,6 +10,17 @@ module.exports = {
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
+      fontSize: {
+        'responsive-sm': 'clamp(0.875rem, 2vw, 1rem)',
+        'responsive-base': 'clamp(1rem, 2.5vw, 1.125rem)',
+        'responsive-lg': 'clamp(1.125rem, 3vw, 1.25rem)',
+        'responsive-xl': 'clamp(1.25rem, 4vw, 1.5rem)',
+        'responsive-2xl': 'clamp(1.5rem, 5vw, 1.875rem)',
+        'responsive-3xl': 'clamp(1.875rem, 6vw, 2.25rem)',
+        'responsive-4xl': 'clamp(2.25rem, 7vw, 3rem)',
+        'responsive-5xl': 'clamp(3rem, 8vw, 3.75rem)',
+        'responsive-6xl': 'clamp(3.75rem, 10vw, 4.5rem)',
+      },
       colors: {
         dark: {
           50: '#f9fafb',

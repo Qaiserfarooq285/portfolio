@@ -37,7 +37,7 @@ export default function About() {
       >
         {/* Section Title */}
         <motion.div variants={itemVariants} className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-bold text-black mb-4">About Me</h2>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-black mb-4">About Me</h2>
           <div className="w-16 h-1 bg-black mx-auto"></div>
         </motion.div>
 
