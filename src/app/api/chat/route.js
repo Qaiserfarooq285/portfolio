@@ -62,6 +62,11 @@ function getProviderConfig() {
   const groqApiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
   const openaiApiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
 
+  console.log('DEBUG: GROQ_API_KEY present?', !!process.env.GROQ_API_KEY);
+  console.log('DEBUG: NEXT_PUBLIC_GROQ_API_KEY present?', !!process.env.NEXT_PUBLIC_GROQ_API_KEY);
+  console.log('DEBUG: OPENAI_API_KEY present?', !!process.env.OPENAI_API_KEY);
+  console.log('DEBUG: groqApiKey resolved?', !!groqApiKey);
+
   if (groqApiKey) {
     return {
       provider: 'groq',
