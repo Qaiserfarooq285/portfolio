@@ -132,7 +132,14 @@ Your portfolio is now available at: `https://portfolio-123456.vercel.app`
 Create `.env.local` in project root:
 
 ```bash
-NEXT_PUBLIC_OPENAI_API_KEY=your_key_here
+GROQ_API_KEY=your_groq_key_here
+# Optional
+GROQ_MODEL=llama-3.3-70b-versatile
+
+# OR use OpenAI instead of Groq
+OPENAI_API_KEY=your_openai_key_here
+OPENAI_MODEL=gpt-4o-mini
+
 NEXT_PUBLIC_EMAIL=your-email@example.com
 ```
 
@@ -141,7 +148,7 @@ NEXT_PUBLIC_EMAIL=your-email@example.com
 1. After deployment, go to Project Settings
 2. Click "Environment Variables"
 3. Add each variable:
-   - Key: `NEXT_PUBLIC_OPENAI_API_KEY`
+   - Key: `GROQ_API_KEY` (or `OPENAI_API_KEY`)
    - Value: `your_key_here`
 4. Click "Save"
 5. Redeploy

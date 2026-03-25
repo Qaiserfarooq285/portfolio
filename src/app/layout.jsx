@@ -1,7 +1,4 @@
-import { Inter } from 'next/font/google';
 import '@/styles/globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
   title: 'Qaiser Farooq | AI Engineer Portfolio',
@@ -25,7 +22,7 @@ export default function RootLayout({ children }) {
         <meta charSet="utf-8" />
         <meta name="theme-color" content="#000000" />
       </head>
-      <body className={`${inter.className} bg-black text-white antialiased`}>
+      <body className="bg-black text-white antialiased">
         {children}
       </body>
     </html>

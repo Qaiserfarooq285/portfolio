@@ -94,9 +94,15 @@ portfolio-website/
   # Edit .env.local and add your Groq API key
    ```
 
-  Required variable:
+  Required variable (choose one provider):
   ```env
   GROQ_API_KEY=your_groq_api_key_here
+  # Optional
+  GROQ_MODEL=llama-3.3-70b-versatile
+
+  # OR use OpenAI instead of Groq
+  OPENAI_API_KEY=your_openai_api_key_here
+  OPENAI_MODEL=gpt-4o-mini
   ```
 
 4. **Add your profile image**
@@ -215,7 +221,9 @@ npm start
 6. Click "Deploy"
 
 ### Environment Variables on Vercel
-- Add your `.env.local` variables in Vercel Project Settings > Environment Variables
+- Add your server-side variables in Vercel Project Settings > Environment Variables
+- Use `GROQ_API_KEY` (recommended for this setup) or `OPENAI_API_KEY`
+- Do not use `NEXT_PUBLIC_*` for secret AI keys
 
 ### Deploy to Other Platforms
 

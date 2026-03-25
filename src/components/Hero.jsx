@@ -40,10 +40,10 @@ export default function Hero() {
         {/* Left Side - Text */}
         <motion.div variants={itemVariants} className="space-y-8">
           <div>
-            <motion.h1 variants={itemVariants} className="text-5xl md:text-6xl font-bold text-white mb-4 leading-tight">
-              <Typewriter texts={nameTypewriterText} speed={120} delayBetween={1600} className="text-5xl md:text-6xl font-bold text-white" />
+            <motion.h1 variants={itemVariants} className="text-3xl sm:text-5xl md:text-6xl font-bold text-white mb-4 leading-tight break-words">
+              <Typewriter texts={nameTypewriterText} speed={120} delayBetween={1600} className="text-3xl sm:text-5xl md:text-6xl font-bold text-white break-words" />
             </motion.h1>
-            <motion.p variants={itemVariants} className="text-2xl md:text-3xl font-light text-gray-400 mb-6">
+            <motion.p variants={itemVariants} className="text-xl sm:text-2xl md:text-3xl font-light text-gray-400 mb-6">
               AI Engineer
             </motion.p>
           </div>
@@ -53,12 +53,12 @@ export default function Hero() {
           </motion.p>
 
           {/* CTA Buttons */}
-          <motion.div variants={itemVariants} className="flex gap-4 pt-4">
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
             <motion.a
               href="#projects"
               whileHover={{ scale: 1.05, borderColor: '#fff' }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 border border-white text-white font-medium transition-colors duration-300 hover:bg-white hover:text-black"
+              className="px-6 sm:px-8 py-3 border border-white text-white font-medium transition-colors duration-300 hover:bg-white hover:text-black text-center"
             >
               View Work
             </motion.a>
@@ -66,7 +66,7 @@ export default function Hero() {
               href="#chatbot"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-3 bg-white text-black font-medium transition-colors duration-300 hover:bg-gray-200"
+              className="px-6 sm:px-8 py-3 bg-white text-black font-medium transition-colors duration-300 hover:bg-gray-200 text-center"
             >
               Chat With Me
             </motion.a>
@@ -78,7 +78,7 @@ export default function Hero() {
           variants={itemVariants}
           className="flex justify-center items-center"
         >
-          <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
+          <div className="relative w-64 h-64 sm:w-80 sm:h-80 md:w-96 md:h-96 flex items-center justify-center">
             <img
               src="/IMG_9642-2.png"
               alt="Profile"

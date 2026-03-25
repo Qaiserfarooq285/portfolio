@@ -55,7 +55,7 @@ export default function Chatbot() {
     }
 
     if (lowerMessage.includes('who are you') || lowerMessage.includes('your name')) {
-      return `I'm Qaiser's portfolio assistant. Qaiser Farooq is an AI Researcher.`;
+      return `I'm Qaiser's portfolio AI assistant. Qaiser Farooq is an AI Researcher.`;
     }
 
     if (lowerMessage.includes('location') || lowerMessage.includes('where are you')) {
@@ -166,7 +166,8 @@ Feel free to connect with him!`;
       });
 
       if (!response.ok) {
-        throw new Error('LLM request failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.error || 'LLM request failed');
       }
 
       const data = await response.json();
@@ -182,7 +183,7 @@ Feel free to connect with him!`;
     } catch (error) {
       const botResponse = {
         id: generateId(),
-        text: generateBotResponse(messageText),
+        text: `AI API is not connected: ${error?.message || 'Unknown error'}\n\n${generateBotResponse(messageText)}`,
         sender: 'bot',
         timestamp: new Date(),
       };
@@ -224,7 +225,8 @@ Feel free to connect with him!`;
         });
 
         if (!response.ok) {
-          throw new Error('LLM request failed');
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData?.error || 'LLM request failed');
         }
 
         const data = await response.json();
@@ -241,7 +243,7 @@ Feel free to connect with him!`;
       } catch (error) {
         const fallbackMsg = {
           id: generateId(),
-          text: generateBotResponse(question),
+          text: `AI API is not connected: ${error?.message || 'Unknown error'}\n\n${generateBotResponse(question)}`,
           sender: 'bot',
           timestamp: new Date(),
         };
@@ -258,7 +260,7 @@ Feel free to connect with him!`;
     <>
       <section id="chatbot" className="h-0 w-0" aria-hidden="true"></section>
 
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3">
         {!isOpen && (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
@@ -292,7 +294,7 @@ Feel free to connect with him!`;
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 right-6 z-50 w-[min(92vw,380px)] h-[520px] bg-black border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
+            className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-50 w-[min(94vw,380px)] h-[min(72vh,520px)] bg-black border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col"
           >
             <div className="px-4 py-3 border-b border-white/15 flex items-center justify-between bg-white/5">
               <div>
@@ -351,7 +353,7 @@ Feel free to connect with him!`;
             </div>
 
             <div className="px-4 pb-3">
-              <div className="flex gap-2 mb-3">
+              <div className="flex flex-wrap gap-2 mb-3">
                 {['Skills?', 'Projects?', 'Available?'].map((question) => (
                   <button
                     key={question}

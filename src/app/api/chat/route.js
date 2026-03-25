@@ -1,6 +1,11 @@
 import OpenAI from 'openai';
 import { cvData, chatbotKnowledge } from '@/data/cvData';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
+export const preferredRegion = 'iad1';
+
 const greetingResponse = "Hello. I'm Qaiser's portfolio AI assistant. How can I help you today? Would you like to know about Qaiser's skills, experience, projects or availabality?";
 
 const systemPrompt = `You are Qaiser's portfolio AI assistant.
@@ -53,6 +58,31 @@ function isGreetingMessage(message = '') {
   return /^(hi|hello|hey|salam|assalamualaikum|asalamualaikum)[!.,\s]*$/.test(lower);
 }
 
+function getProviderConfig() {
+  const groqApiKey = process.env.GROQ_API_KEY || process.env.NEXT_PUBLIC_GROQ_API_KEY;
+  const openaiApiKey = process.env.OPENAI_API_KEY || process.env.NEXT_PUBLIC_OPENAI_API_KEY;
+
+  if (groqApiKey) {
+    return {
+      provider: 'groq',
+      apiKey: groqApiKey,
+      baseURL: process.env.GROQ_BASE_URL || 'https://api.groq.com/openai/v1',
+      model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+    };
+  }
+
+  if (openaiApiKey) {
+    return {
+      provider: 'openai',
+      apiKey: openaiApiKey,
+      baseURL: process.env.OPENAI_BASE_URL,
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+    };
+  }
+
+  return null;
+}
+
 export async function POST(request) {
   try {
     const { message } = await request.json();
@@ -65,24 +95,26 @@ export async function POST(request) {
       return Response.json({ reply: greetingResponse });
     }
 
-    const apiKey = process.env.GROQ_API_KEY;
+    const providerConfig = getProviderConfig();
 
-    if (!apiKey) {
+    if (!providerConfig) {
       return Response.json(
         {
-          error: 'GROQ_API_KEY is not configured.',
+          error: 'No AI provider configured. Set GROQ_API_KEY or OPENAI_API_KEY on the server.',
         },
         { status: 500 }
       );
     }
 
     const client = new OpenAI({
-      apiKey,
-      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: providerConfig.apiKey,
+      baseURL: providerConfig.baseURL,
+      timeout: 25000,
+      maxRetries: 1,
     });
 
     const completion = await client.chat.completions.create({
-      model: process.env.GROQ_MODEL || 'llama-3.3-70b-versatile',
+      model: providerConfig.model,
       temperature: 0.5,
       max_tokens: 350,
       messages: [
