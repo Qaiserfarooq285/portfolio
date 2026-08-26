@@ -287,6 +287,15 @@
     function fallBack() { wrap.classList.add("clip-failed"); }
     if (!canvas || !clip || !canvas.getContext) { fallBack(); return; }
 
+    /* Belt-and-suspenders muting, same as the project-card videos below.
+       The HTML `muted` attribute alone is not always enough for iOS
+       Safari to grant autoplay — Apple's own guidance is to also set the
+       property directly in JS before play() is ever called. */
+    clip.muted = true;
+    clip.defaultMuted = true;
+    clip.setAttribute("muted", "");
+    clip.volume = 0;
+
     var ctx = canvas.getContext("2d");
     var scratch, sctx, w, h, running = false, done = false;
 
