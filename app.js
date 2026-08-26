@@ -279,19 +279,25 @@
      then gets out of the way. */
 
   (function heroIntro() {
+    /* The clip plays as an ordinary video now. Its studio backdrop was
+       replaced at encode time with the page's own colour, so there is
+       nothing to key out at runtime — no canvas, no WebGL shader, no
+       packed colour/matte halves, no per-frame pixel work. That whole
+       pipeline existed only to hide a background the file no longer
+       has, and every failure we hit came from it: decoding suspended
+       for an off-screen video, a JS compositing loop too slow for a
+       phone, and an H.264 level the packed frame pushed past mobile
+       hardware limits.
+
+       It plays once and holds its final frame; a loop would pull focus
+       every few seconds. */
     var wrap = document.querySelector("[data-hero-img]");
     if (!wrap) return;
-    var canvas = wrap.querySelector(".hero-canvas");
     var clip = wrap.querySelector(".hero-clip");
+    if (!clip) { wrap.classList.add("clip-failed"); return; }
 
-    function fallBack(why) {
-      wrap.classList.add("clip-failed");
-      report("fellback:" + why);
-    }
-    if (!canvas || !clip) { fallBack("no-element"); return; }
-
-    /* iOS grants autoplay only to muted video, and checks the property,
-       not just the attribute. Set every form of it before play(). */
+    /* iOS grants autoplay only to muted video and checks the property,
+       not just the attribute, so set every form of it before play(). */
     clip.muted = true;
     clip.defaultMuted = true;
     clip.setAttribute("muted", "");
@@ -299,134 +305,22 @@
     clip.setAttribute("webkit-playsinline", "");
     clip.volume = 0;
 
-    /* ?debug=1 surfaces what actually happened, on the device itself.
-       There is no other way to see a phone-only failure from here. */
-    var debugOn = /[?&]debug=1/.test(window.location.search);
-    var state = { renderer: "-", paints: 0, plays: 0, err: "" };
-    var panel;
-    function report(msg) {
-      if (msg) state.err = state.err ? state.err + " | " + msg : msg;
-      if (!debugOn) return;
-      if (!panel) {
-        panel = document.createElement("pre");
-        panel.style.cssText = "position:fixed;left:6px;bottom:6px;z-index:9999;" +
-          "margin:0;padding:8px 10px;max-width:92vw;white-space:pre-wrap;" +
-          "font:11px/1.45 ui-monospace,monospace;background:rgba(0,0,0,.86);" +
-          "color:#7CFFB2;border-radius:8px;pointer-events:none";
-        document.body.appendChild(panel);
-      }
-      panel.textContent =
-        "renderer " + state.renderer +
-        "\nreadyState " + clip.readyState + "  paused " + clip.paused +
-        "  ended " + clip.ended +
-        "\ncurrentTime " + clip.currentTime.toFixed(2) + " / " + (clip.duration || 0).toFixed(2) +
-        "\npaints " + state.paints + "  playCalls " + state.plays +
-        "\nmuted " + clip.muted + "  videoW " + clip.videoWidth +
-        "\nmediaErr " + (clip.error ? clip.error.code : "none") +
-        "\n" + (state.err || "ok");
-    }
-    if (debugOn) setInterval(function () { report(""); }, 250);
-
-    var w = 0, h = 0, running = false, gl = null, tex = null, ctx2d = null, scratch, sctx;
-
-    /* GPU path. The old 2D path pulled two full frames back out of the
-       canvas every tick (getImageData) and stitched them in a JS loop
-       over ~1.5M pixels — fine on a desktop, far too slow on a phone,
-       where it could not keep up with a 4s clip and effectively showed
-       only its final frame. A shader does the same composite on the GPU
-       with no pixel readback at all. */
-    function initGL() {
-      try {
-        gl = canvas.getContext("webgl", { alpha: true, premultipliedAlpha: false }) ||
-             canvas.getContext("experimental-webgl", { alpha: true, premultipliedAlpha: false });
-      } catch (e) { gl = null; }
-      if (!gl) return false;
-
-      function shader(type, src) {
-        var sh = gl.createShader(type);
-        gl.shaderSource(sh, src); gl.compileShader(sh);
-        if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
-          report("shader:" + gl.getShaderInfoLog(sh)); return null;
-        }
-        return sh;
-      }
-      var vs = shader(gl.VERTEX_SHADER,
-        "attribute vec2 p;varying vec2 v;void main(){" +
-        "v=vec2((p.x+1.0)*0.5,(1.0-p.y)*0.5);gl_Position=vec4(p,0.0,1.0);}");
-      var fs = shader(gl.FRAGMENT_SHADER,
-        "precision mediump float;varying vec2 v;uniform sampler2D t;void main(){" +
-        "vec3 c=texture2D(t,vec2(v.x*0.5,v.y)).rgb;" +
-        "float a=texture2D(t,vec2(v.x*0.5+0.5,v.y)).r;" +
-        "gl_FragColor=vec4(c,a);}");
-      if (!vs || !fs) return false;
-
-      var prog = gl.createProgram();
-      gl.attachShader(prog, vs); gl.attachShader(prog, fs); gl.linkProgram(prog);
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
-        report("link:" + gl.getProgramInfoLog(prog)); return false;
-      }
-      gl.useProgram(prog);
-
-      var buf = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-      gl.bufferData(gl.ARRAY_BUFFER,
-        new Float32Array([-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1]), gl.STATIC_DRAW);
-      var loc = gl.getAttribLocation(prog, "p");
-      gl.enableVertexAttribArray(loc);
-      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-
-      tex = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.uniform1i(gl.getUniformLocation(prog, "t"), 0);
-      return true;
-    }
-
-    function paint() {
-      if (clip.readyState < 2) return;
-      try {
-        if (gl) {
-          gl.bindTexture(gl.TEXTURE_2D, tex);
-          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, clip);
-          gl.viewport(0, 0, w, h);
-          gl.clearColor(0, 0, 0, 0);
-          gl.clear(gl.COLOR_BUFFER_BIT);
-          gl.drawArrays(gl.TRIANGLES, 0, 6);
-        } else {
-          sctx.drawImage(clip, 0, 0);
-          var colour = sctx.getImageData(0, 0, w, h);
-          var alpha = sctx.getImageData(w, 0, w, h);
-          var cd = colour.data, ad = alpha.data;
-          for (var i = 0; i < cd.length; i += 4) cd[i + 3] = ad[i];
-          ctx2d.putImageData(colour, 0, 0);
-        }
-        state.paints++;
-      } catch (e) { report("paint:" + e.message); fallBack("paint"); }
-    }
-
-    function frame() {
-      paint();
-      if (running && !clip.ended) requestAnimationFrame(frame);
-    }
+    clip.addEventListener("error", function () {
+      wrap.classList.add("clip-failed");
+    });
 
     function holdLastFrame() {
-      running = false;
-      clip.currentTime = Math.max((clip.duration || 4) - 0.05, 0);
-      clip.addEventListener("seeked", paint, { once: true });
+      try { clip.currentTime = Math.max((clip.duration || 4) - 0.05, 0); } catch (e) {}
     }
 
-    /* If autoplay is refused — Low Power Mode and some Safari settings
-       refuse it outright — hold the final frame, then let the first tap
-       anywhere start it, since a user gesture is always permitted. */
+    /* A refused play() is not always final on iOS — sometimes it is just
+       called a tick early. Retry once, then fall back to the closing
+       pose and let the first tap start it, since a user gesture is
+       always allowed. */
     function armGestureStart() {
       function go() {
-        state.plays++;
         var p = clip.play();
-        if (p && p.then) p.then(function () { running = true; requestAnimationFrame(frame); })
-                         .catch(function (e) { report("gesture:" + e.name); });
+        if (p && p.catch) p.catch(function () {});
         window.removeEventListener("touchend", go);
         window.removeEventListener("click", go);
       }
@@ -435,60 +329,26 @@
     }
 
     function attemptPlay(isRetry) {
-      state.plays++;
       var p = clip.play();
       if (p && p.catch) {
-        p.catch(function (e) {
+        p.catch(function () {
           if (!isRetry) { setTimeout(function () { attemptPlay(true); }, 250); return; }
-          report("autoplay:" + e.name);
           holdLastFrame();
           armGestureStart();
         });
       }
     }
 
-    clip.addEventListener("error", function () { fallBack("media"); });
-
-    clip.addEventListener("loadeddata", function onData() {
-      w = clip.videoWidth / 2;
-      h = clip.videoHeight;
-      if (!w || !h) { fallBack("no-dimensions"); return; }
-      canvas.width = w; canvas.height = h;
-
-      if (initGL()) {
-        state.renderer = "webgl";
-      } else {
-        state.renderer = "2d";
-        ctx2d = canvas.getContext("2d");
-        if (!ctx2d) { fallBack("no-context"); return; }
-        scratch = document.createElement("canvas");
-        scratch.width = clip.videoWidth; scratch.height = h;
-        sctx = scratch.getContext("2d", { willReadFrequently: true });
-      }
-
-      if (reduced()) { holdLastFrame(); return; }
-
-      running = true;
+    clip.addEventListener("loadeddata", function () {
+      if (reduced()) { holdLastFrame(); return; }   /* no turn under reduced motion */
       attemptPlay(false);
-      requestAnimationFrame(frame);
-    });
-
-    clip.addEventListener("pause", function () {
-      if (running && !clip.ended) {
-        var p = clip.play();
-        if (p && p.catch) p.catch(function () {});
-      }
     });
 
     clip.addEventListener("ended", function () {
-      running = false;
-      paint();
+      clip.pause();                                  /* hold the final frame */
     });
 
-    /* Safari sometimes never fires loadeddata for an off-screen video
-       until something nudges it. */
     if (clip.readyState >= 2) clip.dispatchEvent(new Event("loadeddata"));
-    else clip.load();
   })();
 
   /* ---------------- nav ---------------- */
