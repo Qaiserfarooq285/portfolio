@@ -1084,16 +1084,52 @@ footer {
      ticker: at phone width a full-height figure would have to be
      cropped hard enough to lose his arms, which is why it was ending
      mid-torso. Text first, then the clip running to the section edge. */
-  .hero-grid { display: flex; flex-direction: column; }
-  .hero-copy { order: 1; }
+  /* Stats sit beside the clip rather than above it. Stacked in a
+     column they fill the gap that was empty to the left of the figure,
+     and giving that gap to the clip lets it run noticeably larger in
+     the same hero. display: contents on the copy dissolves the wrapper
+     so the headline, bio, buttons and stats can be placed on the grid
+     individually. */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "head  head"
+      "bio   bio"
+      "cta   cta"
+      "stats photo";
+    align-items: end;
+  }
+  .hero-copy { display: contents; }
+  .hero-reveal { grid-area: head; }
+  .lede    { grid-area: bio; }
+  .cta-row { grid-area: cta; }
+
+  .stats {
+    grid-area: stats;
+    grid-template-columns: 1fr;        /* one per row */
+    gap: 20px;
+    align-self: end;
+    padding-bottom: 34px;
+  }
+
   .hero-photo {
-    order: 2;
+    grid-area: photo;
     float: none;
-    width: 62%;
-    max-width: 290px;
-    /* right-aligned, and flush to the bottom of the hero so it ends
-       exactly where the ticker starts */
-    margin: 20px calc(var(--gut) * -1) 0 auto;
+    width: 100%;
+    max-width: none;
+    align-self: end;
+    /* still bleeds to the viewport edge and lands on the ticker */
+    margin: 0 calc(var(--gut) * -1) 0 0;
+  }
+  /* the canvas is the visible element; .hero-clip is the hidden 1x1
+     source feeding it and must stay that size */
+  .hero-photo .hero-canvas {
+    height: auto;
+    width: 100%;
+    max-height: 54vh;
+    object-fit: contain;
+    object-position: bottom right;
   }
 
   .lede { margin-top: 14px; max-width: none; font-size: 14.5px; line-height: 1.6; }
@@ -1124,10 +1160,11 @@ footer {
   html { scroll-padding-top: 76px; }
   /* below this the column is too narrow for the leading rule too */
   .eyebrow .rule { display: none; }
-  /* three across rather than a 2 + 1 wrap */
-  .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 34px; }
-  .stat-value { font-size: 28px; }
-  .stat-label { font-size: 9px; letter-spacing: .1em; margin-top: 6px; }
+  /* One per row, beside the clip. Three across took the full width and
+     left the clip no column to sit in. */
+  .stats { display: grid; grid-template-columns: 1fr; gap: 18px; margin-top: 30px; }
+  .stat-value { font-size: 30px; }
+  .stat-label { font-size: 9px; letter-spacing: .1em; margin-top: 5px; white-space: nowrap; }
   .nav { padding-inline: 16px; gap: 12px; }
   .brand-name { display: none; }
   .nav-links { gap: 11px; }
