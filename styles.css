@@ -235,15 +235,21 @@ h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -.03em; }
                              can be sized structurally rather than with
                              a viewport calc that svh rounds differently */
   overflow: hidden;
-  /* Flat, and set to the exact colour the clip decodes to (#280211,
-     measured in-browser off the decoded frame, not read from the file:
-     h264 is normally limited-range and gets expanded on the way to the
-     screen, so file and screen disagree. The clip is now tagged
-     full-range so the two match. The clip carries that same colour baked in
-     as its background, so the two are identical and the video has no
-     edge to show. Deliberately not a gradient: any ramp would drift
-     away from the clip's flat background and put a seam back. */
-  background: #2a0212
+  /* Sits on the site's own palette and lands on --ink-900 at the base,
+     which is exactly what the section below it uses, so the hero reads
+     as part of the page rather than a lit panel dropped onto it.
+
+     It used to be sampled from the clip's studio backdrop, back when
+     the clip still showed that backdrop and the two had to agree. The
+     subject is cut out now, so there is nothing left to match — keeping
+     those studio colours only made the hero clash with everything
+     below it. */
+  background:
+    radial-gradient(78% 58% at 70% 26%, rgba(209,77,112,.18), transparent 64%),
+    linear-gradient(to bottom,
+      var(--ink-800) 0%,
+      var(--ink-850) 48%,
+      var(--ink-900) 100%)
 }
 
 
@@ -388,9 +394,11 @@ h1 {
   justify-content: flex-end;
 }
 
-.hero-photo .hero-clip {
+.hero-photo .hero-canvas {
   /* Pulled back from filling the full nav-to-ticker band so he reads at
-     a natural distance rather than looming. contain, so nothing crops. */
+     a more natural distance rather than looming. contain (not cover)
+     means nothing is cropped at this smaller size — the whole figure
+     stays in frame. */
   height: 86%;
   width: auto;
   max-width: 100%;
@@ -413,11 +421,28 @@ h1 {
    described. 1% opacity is not perceptible against the canvas sitting
    directly on top of it, but is enough to read as "visible" to that
    heuristic. */
+.hero-clip {
+  /* Rendered, but 1x1 and effectively invisible. It cannot be
+     display:none — WebKit suspends decoding for video that is not in
+     the render tree, which stops the clip ever playing. But it also
+     cannot cover the hero at 1% opacity, as it did before: that laid a
+     faint wash of the studio backdrop over the whole area, which read
+     as a rectangle. Decode resolution is independent of display size,
+     so 1x1 costs the shader nothing. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  opacity: 0.01;
+  pointer-events: none;
+  z-index: -1;
+}
 .js .hero-photo .hero-still { display: none; }
 .hero-photo.clip-failed .hero-still { display: block; }
-.hero-photo.clip-failed .hero-clip { display: none; }
+.hero-photo.clip-failed .hero-canvas { display: none; }
 
-.hero-photo video,
+.hero-photo canvas,
 .hero-photo img {
   display: block;
   width: 100%;
@@ -428,13 +453,9 @@ h1 {
   max-height: calc(100svh - 96px);
   object-fit: contain;
   object-position: bottom center;
+  /* one shadow pass instead of three stacked drop-shadows */
+  filter: drop-shadow(0 24px 48px rgba(0,0,0,.62));
 }
-
-/* The still keeps its shadow — it is a transparent cutout, so the
-   shadow follows the silhouette. The clip must not have one: it is an
-   opaque rectangle now, and a drop-shadow traces its edges, drawing
-   exactly the box the flat background exists to hide. */
-.hero-photo img { filter: drop-shadow(0 24px 48px rgba(0,0,0,.62)); }
 
 /* ---------- ticker ---------- */
 
@@ -1084,6 +1105,7 @@ footer {
     max-width: none;
     max-height: min(42vh, 320px);
     object-position: top center;
+    filter: drop-shadow(0 16px 32px rgba(0,0,0,.55));
   }
 
   h1 { font-size: clamp(29px, 7.8vw, 54px); letter-spacing: -.038em; }

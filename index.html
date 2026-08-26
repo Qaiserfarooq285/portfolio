@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300..700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css?v=10">
+<link rel="stylesheet" href="styles.css?v=11">
 </head>
 <body>
 
@@ -37,13 +37,14 @@
   <div id="nav-sentinel" aria-hidden="true"></div>
   <div class="hero-grid">
     <div class="hero-photo" data-hero-img>
-      <!-- Plain video. The studio backdrop is replaced at encode time
-           with the page's own colour, so it needs no cut-out, no canvas
-           and no alpha channel — the file simply matches the hero it
-           sits in. The still is the fallback if the video cannot play. -->
-      <video class="hero-clip" src="assets/qaiser-intro.mp4?v=9"
-             muted playsinline preload="auto"
-             aria-label="Qaiser Farooq turning to face the camera"></video>
+      <!-- The clip is one MP4 holding two stacked halves: colour on top,
+           alpha matte below. app.js recombines them onto the canvas, so
+           the backdrop is genuinely transparent and there is no video
+           rectangle to see. The still is the no-JS fallback. -->
+      <canvas class="hero-canvas" width="720" height="1210"
+              aria-label="Qaiser Farooq turning to face the camera"></canvas>
+      <video class="hero-clip" src="assets/qaiser-intro.mp4?v=11"
+             muted playsinline preload="auto" aria-hidden="true"></video>
       <img class="hero-still" src="assets/qaiser-portrait.png"
            alt="Portrait of Qaiser Farooq" width="736" height="1431">
     </div>
@@ -146,6 +147,6 @@
 </footer>
 
 <script src="data.js"></script>
-<script src="app.js?v=8"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>
