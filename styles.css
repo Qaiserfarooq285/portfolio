@@ -401,13 +401,22 @@ h1 {
 }
 
 
+.hero-photo {
+  display: flex;
+  align-items: flex-end;      /* keeps him standing on the ticker */
+  justify-content: flex-end;
+}
+
 .hero-photo .hero-canvas {
-  /* Fills the band between nav and ticker. No mask: the page behind is
-     painted with the clip's own measured backdrop colours, so there is
-     nothing to feather — masking only dimmed the subject. */
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
+  /* Pulled back from filling the full nav-to-ticker band so he reads at
+     a more natural distance rather than looming. contain (not cover)
+     means nothing is cropped at this smaller size — the whole figure
+     stays in frame. */
+  height: 86%;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  object-position: bottom center;
 }
 
 /* Kept off-screen rather than display:none. WebKit (Safari, and iOS
