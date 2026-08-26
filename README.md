@@ -1,361 +1,103 @@
-# Qaiser Farooq - AI Engineer Portfolio
+# Qaiser Farooq — Portfolio
 
-A modern, responsive portfolio website built with Next.js, Tailwind CSS, and Framer Motion. Features a sleek black & white design with smooth animations, an AI chatbot assistant, and fully responsive layout.
+Personal portfolio for Qaiser Farooq, AI Engineer. Plain HTML, CSS and JavaScript — no build step, no dependencies.
 
-## Features
+## Run it
 
-✨ **Premium Design**
-- Black & White Apple-style minimal design
-- Smooth animations and transitions using Framer Motion
-- Fully responsive (mobile, tablet, desktop)
-- Clean typography with optimal spacing
+Open `index.html` in a browser, or serve the folder:
 
-🎯 **Core Sections**
-- **Hero** - Typewriter effect with section navigation
-- **About** - Professional bio with quick stats
-- **Experience** - Timeline of work experience
-- **Projects** - Showcase of AI/ML projects
-- **Education** - Educational background
-- **Skills** - Technical skills and proficiency levels
-- **Chat** - AI assistant to answer questions
-
-🤖 **AI Chatbot**
-- Groq LLM API integration via secure server route
-- Fallback knowledge base powered by CV data
-- Quick question buttons
-- Real-time typing indicator
-
-## Tech Stack
-
-- **Framework**: Next.js 14
-- **Styling**: Tailwind CSS 3
-- **Animations**: Framer Motion 10
-- **Font**: Inter (Google Fonts)
-- **Deployment**: Vercel (recommended)
-
-## Project Structure
-
-```
-portfolio-website/
-├── src/
-│   ├── app/
-│   │   ├── layout.jsx          # Root layout
-│   │   ├── page.jsx            # Home page
-│   │   └── favicon.ico
-│   ├── components/
-│   │   ├── Navbar.jsx          # Navigation bar
-│   │   ├── Hero.jsx            # Hero section
-│   │   ├── Typewriter.jsx      # Typewriter effect
-│   │   ├── About.jsx           # About section
-│   │   ├── Experience.jsx      # Experience timeline
-│   │   ├── Projects.jsx        # Projects showcase
-│   │   ├── Education.jsx       # Education timeline
-│   │   ├── Skills.jsx          # Skills section
-│   │   ├── Chatbot.jsx         # AI Chatbot
-│   │   └── Footer.jsx          # Footer with social links
-│   ├── data/
-│   │   └── cvData.js           # CV data & chatbot knowledge base
-│   └── styles/
-│       └── globals.css         # Global styles
-├── public/
-│   ├── profile.jpg             # Add your profile image here
-│   └── favicon.ico
-├── package.json
-├── next.config.js
-├── tailwind.config.js
-├── postcss.config.js
-├── .env.example
-└── .gitignore
+```bash
+python3 -m http.server 8000
 ```
 
-## Getting Started
+Then visit http://localhost:8000. A local server is recommended — project videos load more reliably over `http://` than `file://`.
 
-### Prerequisites
-- Node.js 18+
-- npm or yarn
+## Structure
 
-### Installation
-
-1. **Navigate to the project directory**
-   ```bash
-   cd portfolio-website
-   ```
-
-2. **Install dependencies**
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
-
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env.local
-  # Edit .env.local and add your Groq API key
-   ```
-
-  Required variable (choose one provider):
-  ```env
-  GROQ_API_KEY=your_groq_api_key_here
-  # Optional
-  GROQ_MODEL=llama-3.3-70b-versatile
-
-  # OR use OpenAI instead of Groq
-  OPENAI_API_KEY=your_openai_api_key_here
-  OPENAI_MODEL=gpt-4o-mini
-  ```
-
-4. **Add your profile image**
-   - Place your profile picture as `profile.jpg` in the `public/` folder
-   - Image dimensions: 800x800px (or any square size)
-   - Supported formats: JPG, PNG, WebP
-
-5. **Run the development server**
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
-
-6. **Open browser**
-   Navigate to [http://localhost:3000](http://localhost:3000)
-
-## Customization
-
-### Update Your Profile Information
-
-Edit `src/data/cvData.js` to update:
-
-```javascript
-export const cvData = {
-  personal: {
-    name: "Your Name",
-    title: "Your Title",
-    email: "your.email@example.com",
-    phone: "+1 234 567 8900",
-    // ... more fields
-  },
-  experience: [...],
-  education: [...],
-  projects: [...],
-  skills: { ... },
-};
+```
+index.html     page markup and section shells
+styles.css     design tokens, layout, motion
+data.js        ALL CONTENT — projects, research, experience, education, skills
+app.js         rendering, scroll reveal, video, nav state, parallax
+assets/        photo and project videos
+backup/        the previous version of the site, kept for reference
 ```
 
-### Change Typewriter Text
+## Editing content
 
-In `src/data/cvData.js`, modify the text in the Hero section:
+Everything you'd normally want to change lives in **`data.js`**. Nothing else needs touching.
 
-```javascript
-const typewriterTexts = [
-  'Your first text',
-  'Your second text',
-  'Your third text',
-];
-```
+**Add a project:**
 
-### Customize Colors & Theme
-
-Edit `tailwind.config.js` to change the color scheme:
-
-```javascript
-colors: {
-  // Modify or add custom colors
-  primary: '#your-color',
-  secondary: '#your-color',
+```js
+{
+  num: "07",
+  dates: "2026",
+  title: "My New Project",
+  video: "assets/my-video.mp4",   // optional
+  repo: "https://github.com/...", // optional
+  tags: ["Tag One", "Tag Two", "Tag Three"]
 }
 ```
 
-### Update Social Links
+Drop the video in `assets/`. Cards with no `video` show the gradient background instead. Tags wrap now, so a fourth tag is safe — but three still reads best.
 
-Modify the social links in `src/data/cvData.js`:
+**Other editable arrays in `data.js`:** `stats`, `research`, `proficiency`, `experience`, `skills`, `education`, `ticker`.
 
-```javascript
-social: {
-  github: "https://github.com/yourprofile",
-  linkedin: "https://linkedin.com/in/yourprofile",
-  whatsapp: "https://wa.me/1234567890",
-  instagram: "https://instagram.com/yourprofile",
-}
-```
+Bio text, headings and the contact form live directly in `index.html`.
 
-### Modify Chatbot Responses
+## Design tokens
 
-Update chatbot knowledge base in `src/data/cvData.js`:
+Defined at the top of `styles.css`. Change one variable to reskin the whole site.
 
-```javascript
-export const chatbotKnowledge = {
-  availability: "Your response here",
-  skills_summary: "Your response here",
-  // ... more responses
-};
-```
+| Variable | Value | Use |
+|---|---|---|
+| `--ink-900` | `#120A0F` | Page background — a warm near-black |
+| `--ink-850` | `#170D13` | Research section |
+| `--ink-700` | `#2B1A23` | Project card gradient top |
+| `--paper` | `#F7F4F2` | Light sections |
+| `--gold` | `#F2B441` | Signature accent — CTA, numbers, ticker |
+| `--rose` | `#D14D70` | Secondary accent, used sparingly |
 
-### LLM Chat API Setup (Groq)
+Depth comes from the `--shadow-*` tokens rather than solid borders. Each one carries a `0 0 0 1px` layer, so the hairline is drawn as part of the elevation instead of fighting it.
 
-- Chat endpoint is implemented at `src/app/api/chat/route.js`
-- Frontend chat calls this route from `src/components/Chatbot.jsx`
-- If API key is missing or request fails, chat automatically falls back to local rule-based responses
+Type is three families with distinct jobs: **DM Sans** for UI and body, **Instrument Serif** italic for the two display accents (the hero role line, the degree fields), **JetBrains Mono** for technical metadata — dates, numbers, tags, labels.
 
-## Building for Production
+## Motion
 
-### Build the project
-```bash
-npm run build
-```
+The motion layer follows a fixed set of rules; if you edit it, keep to them.
 
-### Test production build locally
-```bash
-npm start
-```
+| Rule | Where it lives |
+|---|---|
+| Strong custom easing, never `ease-in` | `--ease-out: cubic-bezier(.23,1,.32,1)` |
+| UI transitions under 300ms | `--t-press: 140ms`, `--t-hover: 200ms` |
+| Reveals slightly longer, they are explanatory | `--t-enter: 420ms` |
+| Animate only `transform` and `opacity` | proficiency bars use `scaleX`, not `width` |
+| Stagger 30–80ms, computed from DOM order | `flushReveals()` in `app.js` |
+| Hover motion gated to real pointers | `@media (hover: hover) and (pointer: fine)` |
+| Every pressable surface has `:active` feedback | `transform: scale(.97)` |
+| `prefers-reduced-motion` drops movement, keeps opacity | bottom of `styles.css` + `reduced()` in `app.js` |
 
-## Deployment
+Position-driven behaviour uses `IntersectionObserver`. There is exactly one scroll listener — the hero parallax — and it is rAF-throttled and writes to two elements, with no layout reads inside the loop. It is desktop-only (>1080px): below that the hero stacks and grows taller, so a fade keyed to scroll depth would wash the copy out while it is still being read.
 
-### Deploy to Vercel (Recommended)
+Videos play only while on screen and pause when they scroll out.
 
-1. Push your code to GitHub
-2. Go to [Vercel Dashboard](https://vercel.com)
-3. Click "New Project"
-4. Import your GitHub repository
-5. Vercel will auto-detect Next.js and configure it
-6. Click "Deploy"
+If JavaScript fails, nothing disappears: the reveal styles are scoped to `html.js`, which is only set by an inline script, and a 2.5s timer force-shows everything as a second safety net.
 
-### Environment Variables on Vercel
-- Add your server-side variables in Vercel Project Settings > Environment Variables
-- Use `GROQ_API_KEY` (recommended for this setup) or `OPENAI_API_KEY`
-- Do not use `NEXT_PUBLIC_*` for secret AI keys
-
-### Deploy to Other Platforms
-
-The project can be deployed to any platform that supports Next.js:
-- **Netlify**: Use Next.js adapter
-- **AWS Amplify**: Supports Next.js
-- **DigitalOcean**: App Platform
-- **Heroku**: With buildpack configuration
-
-## Performance Optimization
-
-- ✅ Image optimization with Next.js Image component
-- ✅ CSS-in-JS with Tailwind (zero runtime)
-- ✅ Font optimization with Google Fonts
-- ✅ Lazy loading sections with Framer Motion
-- ✅ Smooth scrolling behavior
-
-## Browser Support
-
-- Chrome (latest)
-- Firefox (latest)
-- Safari (latest)
-- Edge (latest)
-- Mobile browsers (iOS Safari, Chrome Mobile)
-
-## Features Explained
-
-### Typewriter Effect
-The Hero section features a typewriter effect that:
-- Types text letter by letter
-- Pauses briefly
-- Deletes and cycles to next text
-- Loops continuously
-
-### Smooth Scrolling
-- Enabled globally with CSS `scroll-behavior: smooth`
-- Section-based navigation with anchor links
-- Sticky navbar for quick access
-
-### Animations
-All sections include:
-- Fade-in animations on scroll
-- Hover effects on interactive elements
-- Staggered animations for list items
-- Smooth transitions (300-800ms)
-
-### Responsive Design
-- Mobile-first approach
-- Breakpoints: sm (640px), md (768px), lg (1024px), xl (1280px)
-- Optimized touch targets for mobile
-- Flexible grid layouts
-
-### Dark Mode
-- Pure black background (#000)
-- White text with gray shades
-- Subtle white/gray borders and hovers
-- Optimized for eye comfort
-
-## Troubleshooting
-
-### Profile Image Not Showing
-1. Ensure image is in `public/profile.jpg`
-2. Check file format (JPG, PNG, WebP supported)
-3. Clear browser cache (Ctrl+Shift+Delete)
-4. Check browser console for errors
-
-### Chatbot Not Responding
-1. Check that `cvData.js` is properly imported
-2. Verify `chatbotKnowledge` object is defined
-3. Check browser console for errors
-4. Ensure JavaScript is enabled
-
-### Animations Not Working
-1. Verify Framer Motion is installed: `npm install framer-motion`
-2. Check for browser extensions blocking animations
-3. Try different browser
-4. Check Console for errors
-
-### Build Errors
-```bash
-# Clear cache and reinstall
-rm -rf node_modules .next
-npm install
-npm run build
-```
-
-## Performance Tips
-
-1. **Optimize Images**: Use WebP format for profile image
-2. **Minify CSS**: Tailwind automatically minifies in production
-3. **Code Splitting**: Next.js automatically splits code by route
-4. **Lazy Loading**: Sections load animations on viewport scroll
-
-## GitHub
-
-To push to GitHub:
+## Deploy to GitHub Pages
 
 ```bash
-git init
-git add .
-git commit -m "Initial portfolio commit"
-git branch -M main
-git remote add origin https://github.com/username/portfolio.git
-git push -u origin main
+git init && git add . && git commit -m "Portfolio"
 ```
 
-## License
+```bash
+git remote add origin https://github.com/Qaiserfarooq285/<repo>.git && git push -u origin main
+```
 
-This Portfolio Template is free to use for personal projects. Feel free to customize and deploy!
+Then in the repo: **Settings → Pages → Source: main / root**. Live in a minute at `https://qaiserfarooq285.github.io/<repo>/`.
 
-## Support
+## Notes
 
-For issues or questions:
-1. Check the troubleshooting section
-2. Review the code comments in components
-3. Check browser console for errors
-4. Verify all data is properly formatted in `cvData.js`
-
-## Future Enhancements
-
-Potential features to add:
-- Dark/Light mode toggle
-- Blog section
-- Contact form with email integration
-- Project filters by technology
-- Resume download button
-- Animation preferences (reduced motion)
-- Multi-language support
-- Analytics integration
-
----
-
-**Built with ❤️ using Next.js, Tailwind CSS & Framer Motion**
-
-Happy coding! 🚀
+- The contact form uses `mailto:` — it opens the visitor's email client. For a proper inbox submission, swap in [Formspree](https://formspree.io) or [Resend](https://resend.com).
+- The videos have no poster images. Adding one per project (`poster="assets/x.jpg"`) would remove the brief dark frame before the first video frame decodes.
+- `backup/` holds the previous design. Delete it once you're happy.
