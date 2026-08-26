@@ -235,34 +235,21 @@ h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -.03em; }
                              can be sized structurally rather than with
                              a viewport calc that svh rounds differently */
   overflow: hidden;
-  /* static gradient — the old build animated four blurred blobs
-     forever, which repainted large areas with no user intent */
-  /* The hero becomes the clip's own studio backdrop: lit where the
-     subject stands, falling away to the darker corners exactly as the
-     footage does, so the video has no edge to reveal itself against.
-     Colour stops are sampled from the clip, not invented. */
-  /* The hero IS the clip's backdrop, at the clip's own brightness.
-     Matching a dark page to a lit studio wall was never going to work —
-     the panel always read lighter than everything around it. */
-  /* Sampled by drawing the running video into a canvas and reading the
-     pixels the browser actually paints — not from the source file. The
-     two differ: h264 goes through a colour-space conversion on the way
-     to the screen, so the file's #80253d is painted as #872a43. Matching
-     the file is what kept leaving a visible panel. */
-  background: linear-gradient(to bottom,
-    #7c233b 0%,
-    #7c233b 11.7%,
-    #822740 18.8%,
-    #872a43 25.8%,
-    #872a43 33.8%,
-    #862841 41.7%,
-    #80253c 49.7%,
-    #7c213a 57.6%,
-    #761c34 65.6%,
-    #711931 73.5%,
-    #69132b 82.3%,
-    #600f27 91.2%,
-    #5a0a23 100%)
+  /* Sits on the site's own palette and lands on --ink-900 at the base,
+     which is exactly what the section below it uses, so the hero reads
+     as part of the page rather than a lit panel dropped onto it.
+
+     It used to be sampled from the clip's studio backdrop, back when
+     the clip still showed that backdrop and the two had to agree. The
+     subject is cut out now, so there is nothing left to match — keeping
+     those studio colours only made the hero clash with everything
+     below it. */
+  background:
+    radial-gradient(78% 58% at 70% 26%, rgba(209,77,112,.18), transparent 64%),
+    linear-gradient(to bottom,
+      var(--ink-800) 0%,
+      var(--ink-850) 48%,
+      var(--ink-900) 100%)
 }
 
 
@@ -435,10 +422,18 @@ h1 {
    directly on top of it, but is enough to read as "visible" to that
    heuristic. */
 .hero-clip {
+  /* Rendered, but 1x1 and effectively invisible. It cannot be
+     display:none — WebKit suspends decoding for video that is not in
+     the render tree, which stops the clip ever playing. But it also
+     cannot cover the hero at 1% opacity, as it did before: that laid a
+     faint wash of the studio backdrop over the whole area, which read
+     as a rectangle. Decode resolution is independent of display size,
+     so 1x1 costs the shader nothing. */
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
   opacity: 0.01;
   pointer-events: none;
   z-index: -1;
@@ -1070,22 +1065,8 @@ footer {
 @media (max-width: 1080px) {
   .hero {
     min-height: auto;
-    /* Portrait now sits in the upper half beside the name, so the warm
-       glow follows it up rather than sitting at the base. */
-    /* Same rendered-pixel ramp, remapped: the clip is a shorter float
-       here, so its profile compresses into the top half of the hero. */
-    background: linear-gradient(to bottom,
-      #7c233b 0%,
-      #7c233b 15.3%,
-      #872a43 21.8%,
-      #872a43 25.4%,
-      #80253c 32.7%,
-      #7c213a 36.4%,
-      #711931 43.7%,
-      #600f27 51.7%,
-      #5a0a23 55.4%,
-      #4a0518 76.0%,
-      #3d0413 100%)
+    /* background inherited — one gradient for every width now that it
+       no longer has to line up with wherever the clip happens to sit */
   }
 
   /* Float rather than grid. A grid column leaves an empty block beside
