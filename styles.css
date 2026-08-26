@@ -410,7 +410,23 @@ h1 {
   object-position: center top;
 }
 
-.hero-clip { display: none; }          /* source only, never painted */
+/* Kept off-screen rather than display:none. WebKit (Safari, and iOS
+   Chrome/Firefox which sit on the same engine) suspends decoding for
+   display:none video — the element loads metadata but never actually
+   plays, which reads as the intro silently never starting on a real
+   phone even though it works in every desktop test. Positioned and
+   fully transparent instead: rendering stays live, nothing is ever
+   seen, and it costs nothing since it sits exactly inside the canvas
+   it feeds. */
+.hero-clip {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
 .js .hero-photo .hero-still { display: none; }
 .hero-photo.clip-failed .hero-still { display: block; }
 .hero-photo.clip-failed .hero-canvas { display: none; }
