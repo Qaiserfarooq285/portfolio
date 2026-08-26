@@ -337,14 +337,29 @@
       }
 
       running = true;
-      var started = clip.play();
-      if (started && started.catch) {
-        started.catch(function () {
-          running = false;
-          clip.currentTime = Math.max(clip.duration - 0.05, 0);
-          clip.addEventListener("seeked", paint, { once: true });
-        });
+
+      function freezeOnLastFrame() {
+        running = false;
+        clip.currentTime = Math.max(clip.duration - 0.05, 0);
+        clip.addEventListener("seeked", paint, { once: true });
       }
+
+      function attemptPlay(isRetry) {
+        var started = clip.play();
+        if (started && started.catch) {
+          started.catch(function () {
+            /* A rejected play() on iOS is sometimes just mistimed —
+               called a tick before the browser finishes its own
+               autoplay bookkeeping — rather than a real, permanent
+               denial. One retry catches that case; a second rejection
+               is treated as final. */
+            if (!isRetry) { attemptPlay(true); return; }
+            freezeOnLastFrame();
+          });
+        }
+      }
+
+      attemptPlay(false);
       requestAnimationFrame(frame);
     });
 

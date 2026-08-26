@@ -414,16 +414,23 @@ h1 {
    Chrome/Firefox which sit on the same engine) suspends decoding for
    display:none video — the element loads metadata but never actually
    plays, which reads as the intro silently never starting on a real
-   phone even though it works in every desktop test. Positioned and
-   fully transparent instead: rendering stays live, nothing is ever
-   seen, and it costs nothing since it sits exactly inside the canvas
-   it feeds. */
+   phone even though it works in every desktop test.
+
+   opacity: 0 alone was not enough: iOS Safari's autoplay allowance
+   appears to weigh effective opacity, and rejected play() on a fully
+   transparent element — which our own code then handled exactly as
+   designed for a rejected autoplay, by jumping straight to the last
+   frame and freezing there. That produced a real, correctly rendered
+   cut-out, just with no visible turn — the still frame the report
+   described. 1% opacity is not perceptible against the canvas sitting
+   directly on top of it, but is enough to read as "visible" to that
+   heuristic. */
 .hero-clip {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0;
+  opacity: 0.01;
   pointer-events: none;
   z-index: -1;
 }
