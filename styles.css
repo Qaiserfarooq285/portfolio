@@ -1109,8 +1109,14 @@ footer {
     grid-area: stats;
     grid-template-columns: 1fr;        /* one per row */
     gap: 20px;
-    align-self: end;
-    padding-bottom: 34px;
+    /* Top-aligned with the figure, then nudged down so the first
+       number sits level with his forehead — the hairline is ~6.5% down
+       the clip, measured off the source's alpha channel. The rest fall
+       below it. */
+    align-self: start;
+    /* negative, because the row starts above the figure's own top edge
+       and the number's glyphs sit lower again inside their line box */
+    margin-top: -15px;
   }
 
   .hero-photo {
