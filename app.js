@@ -355,8 +355,8 @@
         "v=vec2((p.x+1.0)*0.5,(1.0-p.y)*0.5);gl_Position=vec4(p,0.0,1.0);}");
       var fs = shader(gl.FRAGMENT_SHADER,
         "precision mediump float;varying vec2 v;uniform sampler2D t;void main(){" +
-        "vec3 c=texture2D(t,vec2(v.x,v.y*0.5)).rgb;" +
-        "float a=texture2D(t,vec2(v.x,v.y*0.5+0.5)).r;" +
+        "vec3 c=texture2D(t,vec2(v.x*0.5,v.y)).rgb;" +
+        "float a=texture2D(t,vec2(v.x*0.5+0.5,v.y)).r;" +
         "gl_FragColor=vec4(c,a);}");
       if (!vs || !fs) return false;
 
@@ -398,7 +398,7 @@
         } else {
           sctx.drawImage(clip, 0, 0);
           var colour = sctx.getImageData(0, 0, w, h);
-          var alpha = sctx.getImageData(0, h, w, h);
+          var alpha = sctx.getImageData(w, 0, w, h);
           var cd = colour.data, ad = alpha.data;
           for (var i = 0; i < cd.length; i += 4) cd[i + 3] = ad[i];
           ctx2d.putImageData(colour, 0, 0);
@@ -450,8 +450,8 @@
     clip.addEventListener("error", function () { fallBack("media"); });
 
     clip.addEventListener("loadeddata", function onData() {
-      w = clip.videoWidth;
-      h = clip.videoHeight / 2;
+      w = clip.videoWidth / 2;
+      h = clip.videoHeight;
       if (!w || !h) { fallBack("no-dimensions"); return; }
       canvas.width = w; canvas.height = h;
 
@@ -462,7 +462,7 @@
         ctx2d = canvas.getContext("2d");
         if (!ctx2d) { fallBack("no-context"); return; }
         scratch = document.createElement("canvas");
-        scratch.width = w; scratch.height = clip.videoHeight;
+        scratch.width = clip.videoWidth; scratch.height = h;
         sctx = scratch.getContext("2d", { willReadFrequently: true });
       }
 
