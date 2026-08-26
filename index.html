@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Qaiser Farooq — AI Engineer</title>
-<meta name="description" content="Qaiser Farooq — AI Engineer in Islamabad, Pakistan. Machine learning, NLP and deep learning: computer vision, edge inference, and sequence modelling with state space models.">
+<title>Qaiser Farooq — AI/ML Engineer</title>
+<meta name="description" content="Qaiser Farooq — AI/ML Engineer in Islamabad, Pakistan. Machine learning, NLP and deep learning: computer vision, edge inference, and sequence modelling with state space models.">
 <meta name="theme-color" content="#120A0F">
 
 <!-- Applied before paint so the reveal states never flash. If JS is
@@ -37,13 +37,22 @@
   <div id="nav-sentinel" aria-hidden="true"></div>
   <div class="hero-grid">
     <div class="hero-photo" data-hero-img>
-      <img src="assets/qaiser-portrait.png" alt="Portrait of Qaiser Farooq" width="736" height="1431">
+      <!-- The clip is one MP4 holding two stacked halves: colour on top,
+           alpha matte below. app.js recombines them onto the canvas, so
+           the backdrop is genuinely transparent and there is no video
+           rectangle to see. The still is the no-JS fallback. -->
+      <canvas class="hero-canvas" width="960" height="1614"
+              aria-label="Qaiser Farooq turning to face the camera"></canvas>
+      <video class="hero-clip" src="assets/qaiser-intro.mp4?v=4"
+             muted playsinline preload="auto" aria-hidden="true"></video>
+      <img class="hero-still" src="assets/qaiser-portrait.png"
+           alt="Portrait of Qaiser Farooq" width="736" height="1431">
     </div>
     <div class="hero-copy" data-hero-copy>
       <div class="hero-reveal" data-hero-reveal>
         <div class="eyebrow" style="--i:0"><span class="rule"></span>Islamabad, Pakistan</div>
         <h1 style="--i:1">Qaiser Farooq.</h1>
-        <p class="role" style="--i:2">AI Engineer</p>
+        <p class="role" style="--i:2">AI/ML Engineer</p>
       </div>
       <p class="lede" data-reveal style="--i:3">I build intelligent systems with machine learning, NLP, and deep learning. I hold a Master's degree in Artificial Intelligence from COMSATS University Islamabad and currently work as an AI Engineer.</p>
       <div class="cta-row" data-reveal style="--i:4">
@@ -134,7 +143,7 @@
 
 <footer>
   <span>© 2026 Qaiser Farooq</span>
-  <span>AI Engineer · Islamabad, Pakistan</span>
+  <span>AI/ML Engineer · Islamabad, Pakistan</span>
 </footer>
 
 <script src="data.js"></script>

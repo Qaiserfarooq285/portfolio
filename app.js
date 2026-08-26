@@ -196,7 +196,9 @@
       return;
     }
 
-    var dur = 1100;
+    /* paced to land with the intro clip rather than finishing well
+       before the turn does */
+    var dur = 2300;
     var start = performance.now();
     (function step(now) {
       var p = Math.min((now - start) / dur, 1);
@@ -206,15 +208,30 @@
     })(start);
   }
 
+  /* threshold 0 rather than 0.5: the hero stats are on screen from the
+     start, but the clip loading reflows the row underneath them, and at
+     0.5 the observer did not fire until that settled — leaving the
+     digits sitting on zero for over two seconds before moving. */
   var countIO = new IntersectionObserver(function (entries) {
     entries.forEach(function (en) {
       if (!en.isIntersecting) return;
       countIO.unobserve(en.target);
       countUp(en.target);
     });
-  }, { threshold: 0.5 });
+  }, { threshold: 0, rootMargin: "0px 0px -5% 0px" });
 
-  document.querySelectorAll("[data-count]").forEach(function (el) { countIO.observe(el); });
+  /* Counters already on screen start directly rather than waiting on the
+     observer. IntersectionObserver callbacks are delivered during the
+     rendering step, which a backgrounded or throttled tab runs rarely —
+     measured here as an in-view element getting no callback at all for
+     600ms+, which left the digits parked on zero through the intro.
+     Anything below the fold still goes through the observer. */
+  document.querySelectorAll("[data-count]").forEach(function (el) {
+    var box = el.getBoundingClientRect();
+    var onScreen = box.top < (window.innerHeight || 0) && box.bottom > 0;
+    if (onScreen) countUp(el);
+    else countIO.observe(el);
+  });
 
   /* ---------------- project video ----------------
      Play only what is on screen. The previous build autoplayed all
@@ -240,6 +257,103 @@
     v.volume = 0;
     videoIO.observe(v);
   });
+
+  /* ---------------- hero intro clip ----------------
+     The clip ships as one MP4 with two stacked halves: colour on top,
+     alpha matte below. Neither VP8 nor VP9 alpha survived encoding in
+     this toolchain, so the halves are recombined here — read both, copy
+     the matte into the colour data's alpha channel, paint the result.
+     The subject is genuinely cut out, so there is no video rectangle
+     and the page behind it can be anything.
+
+     The matte itself is keyed on saturation rather than colour
+     distance: the backdrop sits at S=210 while the suit is S=27 and
+     skin S=96, so saturation separates them cleanly where an RGB key
+     could not — that key ate either the face or the suit depending on
+     how tight it was. Enclosed transparent islands are then filled,
+     since a hole that does not reach the frame border can only be a
+     gap punched in the subject (his eyes, mouth, and collar shadows).
+
+     It plays once and holds its final frame: a loop would pull focus
+     every few seconds, while one turn-to-camera reads as an intro and
+     then gets out of the way. */
+
+  (function heroIntro() {
+    var wrap = document.querySelector("[data-hero-img]");
+    if (!wrap) return;
+    var canvas = wrap.querySelector(".hero-canvas");
+    var clip = wrap.querySelector(".hero-clip");
+
+    function fallBack() { wrap.classList.add("clip-failed"); }
+    if (!canvas || !clip || !canvas.getContext) { fallBack(); return; }
+
+    var ctx = canvas.getContext("2d");
+    var scratch, sctx, w, h, running = false, done = false;
+
+    function paint() {
+      if (clip.readyState < 2) return;
+      try {
+        sctx.drawImage(clip, 0, 0);
+        var colour = sctx.getImageData(0, 0, w, h);
+        var alpha = sctx.getImageData(0, h, w, h);
+        var cd = colour.data, ad = alpha.data;
+        for (var i = 0; i < cd.length; i += 4) cd[i + 3] = ad[i];
+        ctx.putImageData(colour, 0, 0);
+      } catch (e) { fallBack(); }
+    }
+
+    function frame() {
+      paint();
+      if (running && !clip.ended) requestAnimationFrame(frame);
+    }
+
+    clip.addEventListener("error", fallBack);
+
+    clip.addEventListener("loadeddata", function () {
+      w = clip.videoWidth;
+      h = clip.videoHeight / 2;
+      if (!w || !h) { fallBack(); return; }
+      canvas.width = w;
+      canvas.height = h;
+      scratch = document.createElement("canvas");
+      scratch.width = w;
+      scratch.height = clip.videoHeight;
+      sctx = scratch.getContext("2d", { willReadFrequently: true });
+
+      if (reduced()) {
+        /* no turn under reduced motion — hold the closing pose */
+        clip.currentTime = Math.max(clip.duration - 0.05, 0);
+        clip.addEventListener("seeked", paint, { once: true });
+        return;
+      }
+
+      running = true;
+      var started = clip.play();
+      if (started && started.catch) {
+        started.catch(function () {
+          running = false;
+          clip.currentTime = Math.max(clip.duration - 0.05, 0);
+          clip.addEventListener("seeked", paint, { once: true });
+        });
+      }
+      requestAnimationFrame(frame);
+    });
+
+    /* browsers suspend video in throttled surfaces; resume until the
+       turn has actually finished */
+    clip.addEventListener("pause", function () {
+      if (!done && !clip.ended && running) {
+        var p = clip.play();
+        if (p && p.catch) p.catch(function () {});
+      }
+    });
+
+    clip.addEventListener("ended", function () {
+      done = true;
+      running = false;
+      paint();               /* hold the final frame */
+    });
+  })();
 
   /* ---------------- nav ---------------- */
 

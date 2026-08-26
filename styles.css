@@ -10,10 +10,14 @@
   /* ---------- palette ----------
      A warm near-black base so gold reads as light, not as paint.
      One signature accent (gold), one secondary (rose), used sparingly. */
-  --ink-900: #120A0F;
-  --ink-850: #170D13;
-  --ink-800: #1E1219;
-  --ink-700: #2B1A23;
+  /* Sampled from the intro clip's studio backdrop so the video sits on
+     the page without a visible panel edge: #8f2542 at its brightest
+     through #51071b in the darkened corners. */
+  --ink-900: #2A0312;
+  --ink-850: #3D0619;
+  --ink-800: #51071B;
+  --ink-700: #7A1F37;
+  --video-lit: #8F2542;
   --paper:   #F7F4F2;
   --paper-2: #EDE7E3;
   --gold:    #F2B441;
@@ -22,11 +26,14 @@
 
   /* ---------- text ---------- */
   --on-dark:        rgba(255, 255, 255, .94);
-  --on-dark-mut:    rgba(255, 255, 255, .60);
-  --on-dark-faint:  rgba(255, 255, 255, .36);
-  --on-paper:       #1E1219;
-  --on-paper-mut:   rgba(30, 18, 25, .62);
-  --on-paper-faint: rgba(30, 18, 25, .40);
+  /* Lifted from .60/.36: the hero is lit crimson now rather than near
+     black, so the old values fell to 2.9:1 and 2.3:1 against it. These
+     clear 4.5:1 on the brightest part of the backdrop. */
+  --on-dark-mut:    rgba(255, 255, 255, .72);
+  --on-dark-faint:  rgba(255, 255, 255, .62);
+  --on-paper:       #2A0312;
+  --on-paper-mut:   rgba(42, 3, 18, .62);
+  --on-paper-faint: rgba(42, 3, 18, .40);
 
   /* ---------- depth ----------
      Semi-transparent shadows instead of solid borders. The
@@ -224,25 +231,41 @@ h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -.03em; }
   position: relative;
   min-height: 100svh;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;   /* the grid owns the full height, so the clip
+                             can be sized structurally rather than with
+                             a viewport calc that svh rounds differently */
   overflow: hidden;
   /* static gradient — the old build animated four blurred blobs
      forever, which repainted large areas with no user intent */
-  background:
-    radial-gradient(78% 58% at 72% 18%, rgba(209,77,112,.24), transparent 62%),
-    radial-gradient(60% 50% at 12% 82%, rgba(242,180,65,.10), transparent 64%),
-    linear-gradient(168deg, var(--ink-850), var(--ink-900) 62%);
+  /* The hero becomes the clip's own studio backdrop: lit where the
+     subject stands, falling away to the darker corners exactly as the
+     footage does, so the video has no edge to reveal itself against.
+     Colour stops are sampled from the clip, not invented. */
+  /* The hero IS the clip's backdrop, at the clip's own brightness.
+     Matching a dark page to a lit studio wall was never going to work —
+     the panel always read lighter than everything around it. */
+  /* Sampled by drawing the running video into a canvas and reading the
+     pixels the browser actually paints — not from the source file. The
+     two differ: h264 goes through a colour-space conversion on the way
+     to the screen, so the file's #80253d is painted as #872a43. Matching
+     the file is what kept leaving a visible panel. */
+  background: linear-gradient(to bottom,
+    #7c233b 0%,
+    #7c233b 11.7%,
+    #822740 18.8%,
+    #872a43 25.8%,
+    #872a43 33.8%,
+    #862841 41.7%,
+    #80253c 49.7%,
+    #7c213a 57.6%,
+    #761c34 65.6%,
+    #711931 73.5%,
+    #69132b 82.3%,
+    #600f27 91.2%,
+    #5a0a23 100%)
 }
 
-.hero::after {
-  /* soft seam into the ticker */
-  content: "";
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 160px;
-  background: linear-gradient(to top, var(--ink-900), transparent);
-  pointer-events: none;
-}
+
 
 .hero-grid {
   position: relative;
@@ -257,6 +280,7 @@ h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -.03em; }
      then drops the location line to the subject's hairline (~6.5% down
      the trimmed art) instead of the crown. */
   align-items: start;
+  grid-template-rows: 1fr;
   gap: clamp(24px, 4vw, 56px);
 }
 
@@ -277,7 +301,11 @@ h1, h2, h3, h4 { margin: 0; font-weight: 700; letter-spacing: -.03em; }
 .rule { width: 36px; height: 1px; background: var(--gold); opacity: .7; }
 
 h1 {
-  font-size: clamp(52px, 7.4vw, 112px);
+  /* Capped at 92px, not 112px: past ~1400px the type outgrew its column
+     and "Qaiser Farooq." broke onto a second line, so the hero looked
+     different at 1280 than at 1440+. This keeps it one line across the
+     whole desktop range. */
+  font-size: clamp(52px, 7.4vw, 92px);
   line-height: .92;
   letter-spacing: -.045em;
 }
@@ -357,8 +385,39 @@ h1 {
   color: var(--on-dark-faint);
 }
 
-.hero-photo { grid-column: 2; grid-row: 1; align-self: start; }
+.hero-photo {
+  grid-column: 2; grid-row: 1;
+  align-self: stretch;
+  position: relative;
+  /* Bleed past the page gutter to the viewport edge. The clip already
+     meets the nav at the top and the ticker at the bottom, so this
+     leaves only its left side as an internal boundary — and that one
+     edge is matched exactly by the sampled backdrop. Three of four
+     edges simply stop existing, which is why the panel disappears. */
+  /* Past --max the grid stops growing and centres, so pulling back by
+     the gutter alone leaves a gap on wide screens. Also pull back by
+     half the leftover width. */
+  margin-right: calc((var(--gut) + max(0px, (100vw - var(--max)) / 2)) * -1);
+}
+
+
+.hero-photo .hero-canvas {
+  /* Fills the band between nav and ticker. No mask: the page behind is
+     painted with the clip's own measured backdrop colours, so there is
+     nothing to feather — masking only dimmed the subject. */
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
+.hero-clip { display: none; }          /* source only, never painted */
+.js .hero-photo .hero-still { display: none; }
+.hero-photo.clip-failed .hero-still { display: block; }
+.hero-photo.clip-failed .hero-canvas { display: none; }
+
+.hero-photo canvas,
 .hero-photo img {
+  display: block;
   width: 100%;
   /* explicit, or the HTML height attribute acts as a presentational
      hint and max-height clamps it into a box the wrong shape,
@@ -877,6 +936,26 @@ footer {
   opacity: 1;
 }
 
+/* The name writes in left to right across the length of the intro clip,
+   so the turn and the headline resolve together. Long for UI motion,
+   but this is a once-per-visit title sequence, not a control. */
+.js .hero-reveal > h1 {
+  clip-path: inset(0 100% -18% 0);
+  transform: none;
+  opacity: 1;
+  transition: clip-path 3400ms cubic-bezier(.22,.68,.24,1);
+  transition-delay: 120ms;
+}
+.js .hero-reveal.is-in > h1 { clip-path: inset(0 -2% -18% 0); }
+
+@media (prefers-reduced-motion: reduce) {
+  .js .hero-reveal > h1 {
+    clip-path: none;
+    transition: opacity 240ms ease;
+    transition-delay: 0ms;
+  }
+}
+
 /* Hover motion is gated to fine pointers — on touch, :hover
    sticks after a tap and leaves elements in a hovered state. */
 @media (hover: hover) and (pointer: fine) {
@@ -961,10 +1040,20 @@ footer {
     min-height: auto;
     /* Portrait now sits in the upper half beside the name, so the warm
        glow follows it up rather than sitting at the base. */
-    background:
-      radial-gradient(78% 34% at 68% 24%, rgba(209,77,112,.30), transparent 64%),
-      radial-gradient(70% 40% at 20% 62%, rgba(242,180,65,.09), transparent 66%),
-      linear-gradient(168deg, var(--ink-850), var(--ink-900) 74%);
+    /* Same rendered-pixel ramp, remapped: the clip is a shorter float
+       here, so its profile compresses into the top half of the hero. */
+    background: linear-gradient(to bottom,
+      #7c233b 0%,
+      #7c233b 15.3%,
+      #872a43 21.8%,
+      #872a43 25.4%,
+      #80253c 32.7%,
+      #7c213a 36.4%,
+      #711931 43.7%,
+      #600f27 51.7%,
+      #5a0a23 55.4%,
+      #4a0518 76.0%,
+      #3d0413 100%)
   }
 
   /* Float rather than grid. A grid column leaves an empty block beside
@@ -974,20 +1063,29 @@ footer {
   .hero-grid {
     display: block;
     padding-top: 92px;
-    padding-bottom: 56px;
+    padding-bottom: 0;
   }
   .hero-copy { display: block; padding-top: 18px; padding-bottom: 0; }
 
+  /* Stacked here rather than floated. Side-by-side could not reach the
+     ticker: at phone width a full-height figure would have to be
+     cropped hard enough to lose his arms, which is why it was ending
+     mid-torso. Text first, then the clip running to the section edge. */
+  .hero-grid { display: flex; flex-direction: column; }
+  .hero-copy { order: 1; }
   .hero-photo {
-    float: right;
-    width: 40%;
-    max-width: 190px;
-    margin: 2px 0 8px 16px;
+    order: 2;
+    float: none;
+    width: 62%;
+    max-width: 290px;
+    /* right-aligned, and flush to the bottom of the hero so it ends
+       exactly where the ticker starts */
+    margin: 20px calc(var(--gut) * -1) 0 auto;
   }
 
   .lede { margin-top: 14px; max-width: none; font-size: 14.5px; line-height: 1.6; }
   /* buttons start a clean line under the photo */
-  .cta-row { clear: both; margin-top: 16px; padding-top: 0; }
+  .cta-row { clear: none; margin-top: 16px; padding-top: 0; }
 
   .hero-photo img {
     width: 100%;
@@ -995,10 +1093,6 @@ footer {
     max-height: min(42vh, 320px);
     object-position: top center;
     filter: drop-shadow(0 16px 32px rgba(0,0,0,.55));
-    /* the cutout no longer stands on a section edge, so its flat
-       bottom is faded out instead of left hanging in mid-air */
-    -webkit-mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
-    mask-image: linear-gradient(to bottom, #000 76%, transparent 99%);
   }
 
   h1 { font-size: clamp(29px, 7.8vw, 54px); letter-spacing: -.038em; }
